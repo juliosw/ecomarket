@@ -1,26 +1,26 @@
+// product-service/main.go
 package main
 
 import (
     "database/sql"
-    "encoding/json"
+    "fmt"
     "log"
     "net/http"
     "os"
-
+    "github.com/gorilla/mux"
     _ "github.com/lib/pq"
 )
-
-type Product struct {
-    ID    int     `json:"id"`
-    Name  string  `json:"name"`
-    Price float64 `json:"price"`
-}
 
 var db *sql.DB
 
 func initDB() {
     var err error
-    connStr := "user=postgres dbname=ecosystem sslmode=disable password=yourpassword host=postgres"
+    connStr := fmt.Sprintf("user=%s dbname=%s sslmode=disable password=%s host=%s",
+        os.Getenv("POSTGRES_USER"),
+        os.Getenv("POSTGRES_DB"),
+        os.Getenv("POSTGRES_PASSWORD"),
+        os.Getenv("POSTGRES_HOST"),
+    )
     db, err = sql.Open("postgres", connStr)
     if err != nil {
         log.Fatal(err)
@@ -35,29 +35,26 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
     }
     defer rows.Close()
 
-    var products []Product
+    var products []string
     for rows.Next() {
-        var p Product
-        if err := rows.Scan(&p.ID, &p.Name, &p.Price); err != nil {
+        var id int
+        var name string
+        var price float64
+        if err := rows.Scan(&id, &name, &price); err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
-        products = append(products, p)
+        products = append(products, fmt.Sprintf("ID: %d, Name: %s, Price: %.2f", id, name, price))
     }
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(products)
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(fmt.Sprintf("%v", products)))
 }
 
 func main() {
     initDB()
-    http.HandleFunc("/products", getProducts)
+    r := mux.NewRouter()
+    r.HandleFunc("/products", getProducts).Methods("GET")
 
-    port := os.Getenv("PORT")
-    if port == "" {
-        port = "8080"
-    }
-
-    log.Printf("Product Service listening on port %s...", port)
-    log.Fatal(http.ListenAndServe(":"+port, nil))
+    log.Fatal(http.ListenAndServe(":8080", r))
 }

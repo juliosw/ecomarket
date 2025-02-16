@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoMarket</title>
+</head>
+<body>
+    <h1>EcoMarket Transactions</h1>
+    <div id="transactions"></div>
+
+    <script>
+        async function fetchTransactions() {
+            const response = await fetch('http://transaction-service:8081/transactions');
+            const transactions = await response.json();
+            const transactionsDiv = document.getElementById('transactions');
+            transactions.forEach(t => {
+                const p = document.createElement('p');
+                p.textContent = `Transaction ID: ${t.id}, Product ID: ${t.product_id}, Buyer ID: ${t.buyer_id}, Amount: ${t.amount}`;
+                transactionsDiv.appendChild(p);
+            });
+        }
+
+        fetchTransactions();
+    </script>
+</body>
+</html>

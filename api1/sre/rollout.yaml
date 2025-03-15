@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: api1
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 300s}
+      - setWeight: 60
+      - pause: {duration: 300s}
+      - setWeight: 100
+  selector:
+    matchLabels:
+      app: api1
+  template:
+    metadata:
+      labels:
+        app: api1
+    spec:
+      containers:
+      - name: api1
+        image: ghcr.io/username/ecomarket-api1:{{ .Values.version }}
+        ports:
+        - containerPort: 8000

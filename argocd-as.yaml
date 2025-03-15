@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ecomarket
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/juliosw/ecomarket.git
+      revision: main
+      directories:
+      - path: frontend/sre
+      - path: api1/sre
+      - path: api2/sre
+  template:
+    metadata:
+      name: '{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/juliosw/ecomarket.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: default
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

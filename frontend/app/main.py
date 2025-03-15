@@ -24,5 +24,3 @@ async def get_products(request: Request):
         )
 
     return response.json()
-
-    

@@ -1,0 +1,125 @@
+name: Ecomarket CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest pytest-asyncio fastapi uvicorn httpx
+        
+    - name: Lint with flake8
+      run: |
+        flake8 . --max-line-length=120 --exclude=venv
+        
+    - name: Validate Kubernetes manifests
+      uses: stefanprodan/kube-tools@v1
+      with:
+        kubectl: 1.24.0
+        command: |
+          kubeval frontend/sre/*.yaml api1/sre/*.yaml api2/sre/*.yaml istio-gateway/*.yaml
+          
+    - name: Test Frontend
+      run: |
+        pytest frontend/app/tests/ -v
+        
+    - name: Test API1
+      run: |
+        pytest api1/app/tests/ -v
+        
+    - name: Test API2
+      run: |
+        pytest api2/app/tests/ -v
+
+  build-and-push:
+    needs: validate-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        
+    - name: Build and push Frontend image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./frontend
+        push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+        labels: ${{ steps.meta.outputs.labels }}
+        
+    - name: Build and push API1 image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./api1
+        push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api1:${{ github.sha }}
+        labels: ${{ steps.meta.outputs.labels }}
+        
+    - name: Build and push API2 image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./api2
+        push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api2:${{ github.sha }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  update-manifests:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Update image tags in manifests
+      run: |
+        sed -i "s|ghcr.io/juliosw/ecomarket-frontend:.*|${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}|" frontend/sre/rollout.yaml
+        sed -i "s|ghcr.io/juliosw/ecomarket-api1:.*|${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api1:${{ github.sha }}|" api1/sre/rollout.yaml
+        sed -i "s|ghcr.io/juliosw/ecomarket-api2:.*|${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api2:${{ github.sha }}|" api2/sre/rollout.yaml
+        
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git add frontend/sre/rollout.yaml api1/sre/rollout.yaml api2/sre/rollout.yaml
+        git commit -m "Update image tags to ${{ github.sha }}"
+        git push

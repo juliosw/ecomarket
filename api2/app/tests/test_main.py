@@ -18,3 +18,4 @@ async def test_get_products(client):
     assert response.status_code == 200
     assert "response_id" in response.json()
     assert response.json()["original_request_id"] == "test-request-id"
+    

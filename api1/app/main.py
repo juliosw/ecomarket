@@ -2,7 +2,9 @@ from fastapi import FastAPI, Request
 import httpx
 import uuid
 
+
 app = FastAPI()
+
 
 @app.get("/products")
 async def get_products(request: Request):

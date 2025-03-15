@@ -23,3 +23,4 @@ async def get_external_products(request: Request):
             "destination_ip": source_ip,
             "data": response.json()
         }
+        

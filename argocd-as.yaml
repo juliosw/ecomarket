@@ -8,9 +8,7 @@ spec:
       repoURL: https://github.com/juliosw/ecomarket.git
       revision: main
       directories:
-      - path: frontend/sre
-      - path: api1/sre
-      - path: api2/sre
+      - path: charts/*
   template:
     metadata:
       name: '{{path.basename}}'
@@ -20,6 +18,9 @@ spec:
         repoURL: https://github.com/juliosw/ecomarket.git
         targetRevision: main
         path: '{{path}}'
+        helm:
+          valueFiles:
+          - values.yaml
       destination:
         server: https://kubernetes.default.svc
         namespace: default

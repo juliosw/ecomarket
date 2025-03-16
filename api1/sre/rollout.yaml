@@ -22,6 +22,6 @@ spec:
     spec:
       containers:
       - name: api1
-        image: ghcr.io/username/ecomarket-api1:{{ .Values.version }}
+        image: ghcr.io/juliosw/ecomarket-api1:{{ .Values.version }}
         ports:
         - containerPort: 8000

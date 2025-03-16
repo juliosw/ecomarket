@@ -22,6 +22,6 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ghcr.io/username/ecomarket-frontend:{{ .Values.version }}
+        image: ghcr.io/juliosw/ecomarket-frontend:{{ .Values.version }}
         ports:
         - containerPort: 8000

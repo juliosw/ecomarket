@@ -48,15 +48,15 @@ jobs:
 
     - name: Test Frontend
       run: |
-        pytest frontend/app/tests/ -v
+        pytest frontend/charts/app/tests/ -v
 
     - name: Test API1
       run: |
-        pytest api1/app/tests/ -v
+        pytest api1/charts/app/tests/ -v
 
     - name: Test API2
       run: |
-        pytest api2/app/tests/ -v
+        pytest api2/charts/app/tests/ -v
 
   build-and-push:
     needs: validate-and-test

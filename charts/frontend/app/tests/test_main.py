@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from ..main import app  # Import relativo
+from main import app  # Import absoluto relativo ao diretório app/
 
 
 client = TestClient(app)

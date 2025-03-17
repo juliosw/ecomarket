@@ -1,0 +1,14 @@
+istio:
+  enabled: true
+  gateway:
+    name: "istio-ingressgateway"
+    hosts:
+      - "frontend.ecomarket.local"
+      - "api1.ecomarket.local"
+      - "api2.ecomarket.local"
+    port:
+      number: 80
+      name: http
+      protocol: HTTP
+    selector:
+      istio: ingressgateway  # Conecta ao istio-ingressgateway existente

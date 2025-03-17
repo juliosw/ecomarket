@@ -1,0 +1,22 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Values.istio.gateway.name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  selector:
+    {{- range $key, $value := .Values.istio.gateway.selector }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+  servers:
+  - port:
+      number: {{ .Values.istio.gateway.port.number }}
+      name: {{ .Values.istio.gateway.port.name }}
+      protocol: {{ .Values.istio.gateway.port.protocol }}
+    hosts:
+    {{- range .Values.istio.gateway.hosts }}
+    - {{ . | quote }}
+    {{- end }}
+{{- end }}

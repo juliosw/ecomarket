@@ -49,13 +49,13 @@ jobs:
       run: |
         # Testes para frontend
         cd charts/frontend/app/
-        pytest tests/ -v
+        pytest tests/ -v --import-mode=prepend
         # Testes para api1
         cd ../../api1/app/
-        pytest tests/ -v
+        pytest tests/ -v --import-mode=prepend
         # Testes para api2
         cd ../../api2/app/
-        pytest tests/ -v
+        pytest tests/ -v --import-mode=prepend
 
   build-and-push:
     needs: validate-and-test

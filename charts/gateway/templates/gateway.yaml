@@ -13,5 +13,7 @@ spec:
       name: {{ .Values.istio.gateway.port.name }}
       protocol: {{ .Values.istio.gateway.port.protocol }}
     hosts:
-    {{ toYaml .Values.istio.gateway.hosts | indent 4 }}
+      {{- range .Values.istio.gateway.hosts }}
+      - {{ . | quote }}
+      {{- end }}
 {{- end }}

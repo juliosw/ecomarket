@@ -1,8 +1,8 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-import httpx
 
 app = FastAPI()
+
 
 @app.get("/", response_class=HTMLResponse)
 async def home():
@@ -26,19 +26,26 @@ async def home():
                 const form = document.getElementById('cadastroForm');
                 const nome = form.nome.value;
                 const email = form.email.value;
-                const scoreResponse = await fetch('http://app.tunnelsw.com/score', { headers: { 'Host': 'api2.tunnelsw.com' } });
+                const scoreResponse = await fetch('http://app.tunnelsw.com/score', {
+                    headers: { 'Host': 'api2.tunnelsw.com' }
+                });
                 const scoreData = await scoreResponse.json();
                 const score = scoreData.score;
                 const response = await fetch('http://app.tunnelsw.com/register', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Host': 'api1.tunnelsw.com' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Host': 'api1.tunnelsw.com'
+                    },
                     body: JSON.stringify({ nome, email, score })
                 });
                 const result = await response.json();
                 document.getElementById('result').innerHTML = JSON.stringify(result);
             }
             async function listUsers() {
-                const response = await fetch('http://app.tunnelsw.com/users', { headers: { 'Host': 'api1.tunnelsw.com' } });
+                const response = await fetch('http://app.tunnelsw.com/users', {
+                    headers: { 'Host': 'api1.tunnelsw.com' }
+                });
                 const users = await response.json();
                 document.getElementById('result').innerHTML = JSON.stringify(users);
             }

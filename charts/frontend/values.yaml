@@ -1,7 +1,7 @@
 replicaCount: 3
 image:
   repository: ghcr.io/juliosw/ecomarket-frontend
-  tag: 3678a7d1ebe5188b1838b6470c573b96d0033f34
+  tag: cdc14fffdf1c46639536ac4c14cdaf057343d9da  # Atualizar após novo build
   pullPolicy: IfNotPresent
 service:
   type: ClusterIP
@@ -22,7 +22,46 @@ rollout:
 istio:
   virtualService:
     hosts:
-      - "frontend.ecomarket.local"
+      - "app.tunnelsw.com"  # Atualizado para o novo domínio
+    gateways:
+      - "istio-ingressgateway"
+  destinationRule:
+    subsets:
+      - name: v1
+        labels:
+          version: v1
+      - name: v2
+        labels:
+          version: v2
+configmap:
+  data:
+    ENVIRONMENT: "production"
+    LOG_LEVEL: "INFO"
+    apiToken: "frontendtoken"replicaCount: 3
+image:
+  repository: ghcr.io/juliosw/ecomarket-frontend
+  tag: cdc14fffdf1c46639536ac4c14cdaf057343d9da  # Atualizar após novo build
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 8000
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+rollout:
+  canary:
+    steps:
+      - setWeight: 10
+      - pause: { duration: 5m }
+      - setWeight: 50
+      - pause: { duration: 5m }
+      - setWeight: 100
+istio:
+  virtualService:
+    hosts:
+      - "app.tunnelsw.com"  # Atualizado para o novo domínio
     gateways:
       - "istio-ingressgateway"
   destinationRule:
@@ -38,4 +77,3 @@ configmap:
     ENVIRONMENT: "production"
     LOG_LEVEL: "INFO"
     apiToken: "frontendtoken"
-

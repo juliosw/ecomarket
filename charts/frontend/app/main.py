@@ -1,26 +1,48 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Form
+from fastapi.responses import HTMLResponse
 import httpx
-import uuid
-
 
 app = FastAPI()
 
-
-@app.get("/products")
-async def get_products(request: Request):
-    request_id = str(uuid.uuid4())
-    client_ip = request.client.host
-
-    headers = {
-        "X-Request-ID": request_id,
-        "X-Source-IP": client_ip,
-        "X-Destination-IP": "api1-service"
-    }
-
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "http://api1-service:8000/products",
-            headers=headers
-        )
-
-    return response.json()
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    return """
+    <html>
+    <body>
+        <h1>Ecomarket Frontend</h1>
+        <button onclick="document.getElementById('form').style.display='block'">Cadastro</button>
+        <button onclick="listUsers()">Listar</button>
+        <div id="form" style="display:none">
+            <form id="cadastroForm" onsubmit="submitForm(event)">
+                <label>Nome:</label><input type="text" name="nome"><br>
+                <label>Email:</label><input type="text" name="email"><br>
+                <input type="submit" value="Cadastrar">
+            </form>
+        </div>
+        <div id="result"></div>
+        <script>
+            async function submitForm(event) {
+                event.preventDefault();
+                const form = document.getElementById('cadastroForm');
+                const nome = form.nome.value;
+                const email = form.email.value;
+                const scoreResponse = await fetch('http://app.tunnelsw.com/score', { headers: { 'Host': 'api2.tunnelsw.com' } });
+                const scoreData = await scoreResponse.json();
+                const score = scoreData.score;
+                const response = await fetch('http://app.tunnelsw.com/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Host': 'api1.tunnelsw.com' },
+                    body: JSON.stringify({ nome, email, score })
+                });
+                const result = await response.json();
+                document.getElementById('result').innerHTML = JSON.stringify(result);
+            }
+            async function listUsers() {
+                const response = await fetch('http://app.tunnelsw.com/users', { headers: { 'Host': 'api1.tunnelsw.com' } });
+                const users = await response.json();
+                document.getElementById('result').innerHTML = JSON.stringify(users);
+            }
+        </script>
+    </body>
+    </html>
+    """

@@ -37,4 +37,4 @@ configmap:
   data:
     ENVIRONMENT: "production"
     LOG_LEVEL: "INFO"
-    apiToken: "frontendtoken"replicaCount: 3
+    apiToken: "frontendtoken"

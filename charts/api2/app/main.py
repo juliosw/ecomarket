@@ -2,7 +2,9 @@ from fastapi import FastAPI, HTTPException
 import random
 import os
 
+
 app = FastAPI()
+
 
 @app.get("/score")
 async def generate_score(token: str = None):

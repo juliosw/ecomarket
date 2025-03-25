@@ -2,7 +2,9 @@ from fastapi import FastAPI, HTTPException
 import asyncpg
 import os
 
+
 app = FastAPI()
+
 
 async def get_db_connection():
     return await asyncpg.connect(
@@ -11,6 +13,7 @@ async def get_db_connection():
         database=os.getenv("DB_NAME"),
         host=os.getenv("DB_HOST")
     )
+
 
 @app.on_event("startup")
 async def startup():
@@ -24,6 +27,7 @@ async def startup():
         )
     """)
     await conn.close()
+
 
 @app.post("/register")
 async def register(nome: str, email: str, score: int, token: str = None):

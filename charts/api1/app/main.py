@@ -38,6 +38,7 @@ async def register(nome: str, email: str, score: int, token: str = None):
     await conn.close()
     return {"message": "User registered successfully"}
 
+
 @app.get("/users")
 async def list_users(token: str = None):
     if token != os.getenv("API_TOKEN"):

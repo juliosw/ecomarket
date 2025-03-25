@@ -1,25 +1,11 @@
-from fastapi import FastAPI, Request
-import httpx
-import uuid
-
+from fastapi import FastAPI, HTTPException
+import random
+import os
 
 app = FastAPI()
 
-
-@app.get("/external-products")
-async def get_external_products(request: Request):
-    request_id = request.headers.get("X-Request-ID")
-    source_ip = request.headers.get("X-Source-IP")
-
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://api.publicapis.org/entries"
-        )
-
-        return {
-            "response_id": str(uuid.uuid4()),
-            "original_request_id": request_id,
-            "source_ip": "api2-service",
-            "destination_ip": source_ip,
-            "data": response.json()
-        }
+@app.get("/score")
+async def generate_score(token: str = None):
+    if token != os.getenv("API_TOKEN"):
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return {"score": random.randint(100, 1000)}

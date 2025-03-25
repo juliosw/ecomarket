@@ -1,7 +1,7 @@
 replicaCount: 3
 image:
   repository: ghcr.io/juliosw/ecomarket-frontend
-  tag: 907da54a5aaa60020a5357453160ce101e70a2e4  # Última tag do manifesto
+  tag: c3af5ce52b24b0276f255331386d65f464d81e1d
   pullPolicy: IfNotPresent
 service:
   type: ClusterIP

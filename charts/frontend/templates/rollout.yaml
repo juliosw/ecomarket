@@ -27,12 +27,12 @@ spec:
         - name: ENVIRONMENT
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-config
+              name: {{ .Release.Name }}-config  # Corrigido para consistência
               key: ENVIRONMENT
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-config
+              name: {{ .Release.Name }}-config  # Corrigido para consistência
               key: LOG_LEVEL
         resources:
           requests:
@@ -41,6 +41,18 @@ spec:
           limits:
             cpu: "500m"
             memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
   strategy:
     canary:
       steps:

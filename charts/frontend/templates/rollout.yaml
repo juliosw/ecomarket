@@ -32,7 +32,7 @@ spec:
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-configmap
+              name: {{ .Release.Name }}-config
               key: LOG_LEVEL
         resources:
           requests:

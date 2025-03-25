@@ -13,9 +13,7 @@ spec:
     metadata:
       labels:
         app: {{ .Release.Name }}
-        version: v1  # Versão inicial, ajustada pelo rollout
-      annotations:
-        splunk.com/index: "ecomarket"  # Para Splunk OpenTelemetry
+        version: v1
     spec:
       containers:
       - name: {{ .Release.Name }}
@@ -24,23 +22,47 @@ spec:
         ports:
         - containerPort: {{ .Values.service.port }}
         env:
+        - name: DB_HOST
+          value: "ecomarket-postgres-service.default.svc.cluster.local"
+        - name: DB_NAME
+          value: "ecomarket_db"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
         - name: ENVIRONMENT
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-configmap
+              name: {{ .Release.Name }}-config
               key: ENVIRONMENT
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-configmap
+              name: {{ .Release.Name }}-config
               key: LOG_LEVEL
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
+        - name: API_TOKEN  # Adicionado
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: apiToken
+        readinessProbe:
+          httpGet:
+            path: /users
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /users
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
   strategy:
     canary:
       steps:

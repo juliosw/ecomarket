@@ -1,15 +1,15 @@
-replicaCount: 3
+replicaCount: 1
 image:
   repository: ghcr.io/juliosw/ecomarket-api1
-  tag: 4e6e35a4a82f7111447c5d71ec299d4c066b585c
+  tag: latest  # Atualize conforme necessário
   pullPolicy: IfNotPresent
 service:
   type: ClusterIP
   port: 8000
 hpa:
   enabled: true
-  minReplicas: 3
-  maxReplicas: 10
+  minReplicas: 1
+  maxReplicas: 5
   targetCPUUtilizationPercentage: 80
 rollout:
   canary:
@@ -22,7 +22,7 @@ rollout:
 istio:
   virtualService:
     hosts:
-      - "api1.ecomarket.local"
+      - "api1.tunnelsw.com"
     gateways:
       - "istio-ingressgateway"
   destinationRule:
@@ -33,7 +33,7 @@ istio:
       - name: v2
         labels:
           version: v2
-configmap:
+configmap:  # Adicionado
   data:
     ENVIRONMENT: "production"
     LOG_LEVEL: "INFO"

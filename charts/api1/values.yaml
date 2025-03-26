@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: ghcr.io/juliosw/ecomarket-api1
-  tag: 46b3fedbbdffecdabeed87e3e6c485170fb96c93
+  tag: 4cc364c9ea951d9964896c0e4c649687841b95e6
   pullPolicy: IfNotPresent
 service:
   type: ClusterIP

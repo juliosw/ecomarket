@@ -4,9 +4,11 @@ import os
 
 app = FastAPI()
 
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
 
 @app.get("/score")
 async def generate_score(token: str = None):

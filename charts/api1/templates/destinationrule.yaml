@@ -10,8 +10,6 @@ spec:
     loadBalancer:
       simple: ROUND_ROBIN
   subsets:
-  {{- range .Values.istio.destinationRule.subsets }}
-    - name: {{ .name }}
-      labels:
-        version: {{ .labels.version }}
-  {{- end }}
+  - name: v1
+    labels:
+      version: v1

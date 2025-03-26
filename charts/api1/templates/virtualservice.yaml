@@ -18,8 +18,3 @@ spec:
     - destination:
         host: {{ .Release.Name }}-service
         subset: v1
-      weight: 100
-    - destination:
-        host: {{ .Release.Name }}-service
-        subset: v2
-      weight: 0

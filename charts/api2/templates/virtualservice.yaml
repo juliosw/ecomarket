@@ -18,5 +18,4 @@ spec:
     - destination:
         host: {{ .Release.Name }}-service
         subset: v1
-      weight: 100  # Peso inicial, ajustado pelo rollout
 {{- end }}

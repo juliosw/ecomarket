@@ -1,24 +1,16 @@
 replicaCount: 1
 image:
   repository: ghcr.io/juliosw/ecomarket-api2
-  tag: 78e2a06d2ec301d9751494f722b613646fb7a96e
+  tag: da1b3fee4eb0cea34bf16b5a9324ba7e7f6d21c8-v2  # Nova tag após rebuild
   pullPolicy: IfNotPresent
 service:
   type: ClusterIP
   port: 8000
 hpa:
-  enabled: true
+  enabled: false  # Desativado para 1 pod fixo
   minReplicas: 1
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
-rollout:
-  canary:
-    steps:
-      - setWeight: 10
-      - pause: { duration: 5m }
-      - setWeight: 50
-      - pause: { duration: 5m }
-      - setWeight: 100
 istio:
   virtualService:
     hosts:
@@ -30,10 +22,7 @@ istio:
       - name: v1
         labels:
           version: v1
-      - name: v2
-        labels:
-          version: v2
-configmap:  # Adicionado
+configmap:
   data:
     ENVIRONMENT: "production"
     LOG_LEVEL: "INFO"

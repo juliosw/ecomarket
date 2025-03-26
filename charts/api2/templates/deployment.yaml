@@ -1,7 +1,8 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-rollout
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}
 spec:
@@ -9,6 +10,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}
+      version: v1
   template:
     metadata:
       labels:
@@ -22,6 +24,20 @@ spec:
         ports:
         - containerPort: {{ .Values.service.port }}
         env:
+        - name: DB_HOST
+          value: "postgres-postgres-service.default.svc.cluster.local"  # Ajustado
+        - name: DB_NAME
+          value: "ecomarket_db"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
         - name: ENVIRONMENT
           valueFrom:
             configMapKeyRef:
@@ -32,7 +48,7 @@ spec:
             configMapKeyRef:
               name: {{ .Release.Name }}-config
               key: LOG_LEVEL
-        - name: API_TOKEN  # Adicionado
+        - name: API_TOKEN
           valueFrom:
             configMapKeyRef:
               name: {{ .Release.Name }}-config
@@ -49,11 +65,3 @@ spec:
             port: 8000
           initialDelaySeconds: 15
           periodSeconds: 20
-  strategy:
-    canary:
-      steps:
-      {{- range .Values.rollout.canary.steps }}
-      - {{ if .setWeight }}setWeight: {{ .setWeight }}{{ else }}pause: { duration: {{ .pause.duration }} }{{ end }}
-      {{- end }}
-      canaryService: {{ .Release.Name }}-canary-service
-      stableService: {{ .Release.Name }}-service

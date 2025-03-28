@@ -14,10 +14,7 @@ spec:
   - {{ . | quote }}
   {{- end }}
   http:
-  - match:
-    - uri:
-        prefix: "/"
-    route:
+  - route:
     - destination:
         host: {{ .Release.Name }}-service
         subset: v1

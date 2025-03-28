@@ -22,8 +22,36 @@ spec:
         - containerPort: {{ .Values.service.port }}
         env:
         - name: ENVIRONMENT
-          value: {{ .Values.configmap.data.ENVIRONMENT | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: ENVIRONMENT
         - name: LOG_LEVEL
-          value: {{ .Values.configmap.data.LOG_LEVEL | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: LOG_LEVEL
         - name: API_TOKEN
-          value: {{ .Values.configmap.data.apiToken | quote }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-config
+              key: apiToken
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20

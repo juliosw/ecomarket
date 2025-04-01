@@ -1,6 +1,0 @@
-apiVersion: v2
-name: api2
-description: A Helm chart for ecomarket API2
-type: application
-version: 0.2.0  # Incrementado para refletir o uso de Rollout
-appVersion: "1.0"

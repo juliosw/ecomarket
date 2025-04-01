@@ -1,9 +1,0 @@
-image:
-  repository: postgres
-  tag: "13"
-service:
-  port: 5432
-database:
-  name: ecomarket_db
-persistence:
-  size: 1Gi
